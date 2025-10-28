@@ -3,6 +3,8 @@ from typing import Any, Dict
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from x402.fastapi.middleware import require_payment
 from x402.types import EIP712Domain, TokenAmount, TokenAsset, HTTPInputSchema
 from cdp.auth import generate_jwt, JwtOptions
@@ -34,6 +36,11 @@ if not NETWORK or NETWORK not in ["base", "base-sepolia"]:
     raise ValueError(f"Invalid network: {NETWORK}")
 
 app = FastAPI()
+
+# Mount static files directory for favicon and other assets
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+if os.path.exists(static_dir):
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 
 # Coinbase Facilitator configuration
@@ -153,6 +160,16 @@ app.middleware("http")(dynamic_price_middleware)
 @app.get("/")
 async def health_check():
     return {"status": "ok"}
+
+
+@app.get("/favicon.ico")
+async def favicon():
+    """Serve favicon for x402scan to display as resource icon"""
+    favicon_path = os.path.join(os.path.dirname(__file__), "static", "favicon.ico")
+    if os.path.exists(favicon_path):
+        return FileResponse(favicon_path, media_type="image/x-icon")
+    # Return a default response if favicon doesn't exist
+    return FileResponse(favicon_path, media_type="image/x-icon", status_code=404)
 
 
 @app.api_route("/acp-budget", methods=["GET", "POST"])
