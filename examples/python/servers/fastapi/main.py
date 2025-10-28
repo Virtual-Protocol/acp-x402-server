@@ -161,7 +161,9 @@ async def acp_budget(request: Request) -> Dict[str, Any]:
     Handle both GET and POST requests for ACP budget payment.
     x402scan may use either method depending on the request.
     """
-    return {
+    from fastapi.responses import JSONResponse
+    
+    response_data = {
         "message": "pay acp job budget",
         "token": "acp job payment token",
         "protocol": "x402",
@@ -170,6 +172,15 @@ async def acp_budget(request: Request) -> Dict[str, Any]:
         "advice": "not financial advice",
         "method": request.method  # Show which method was used
     }
+    
+    # Explicitly disable compression for x402scan compatibility
+    return JSONResponse(
+        content=response_data,
+        headers={
+            "Content-Encoding": "identity",  # Tell CloudFlare: no compression
+            "Cache-Control": "no-transform",  # Prevent any transformation
+        }
+    )
 
 
 # @app.get("/premium/content")
