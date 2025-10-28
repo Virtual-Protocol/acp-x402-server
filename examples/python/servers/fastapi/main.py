@@ -136,12 +136,7 @@ app.middleware("http")(
 )
 
 
-@app.api_route("/", methods=["GET", "HEAD"])
-async def health_check():
-    return {"status": "ok"}
-
-
-@app.api_route("/health", methods=["GET", "HEAD"])
+@app.get("/")
 async def health_check():
     return {"status": "ok"}
 
