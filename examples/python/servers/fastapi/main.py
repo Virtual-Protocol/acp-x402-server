@@ -136,6 +136,16 @@ app.middleware("http")(
 )
 
 
+@app.api_route("/", methods=["GET", "HEAD"])
+async def health_check():
+    return {"status": "ok"}
+
+
+@app.api_route("/health", methods=["GET", "HEAD"])
+async def health_check():
+    return {"status": "ok"}
+
+
 @app.get("/acp-budget")
 async def acp_budget() -> Dict[str, Any]:
     return {
