@@ -3,6 +3,7 @@ from typing_extensions import (
     TypedDict,
 )  # use `typing_extensions.TypedDict` instead of `typing.TypedDict` on Python < 3.12
 import httpx
+import logging
 from x402.types import (
     PaymentPayload,
     PaymentRequirements,
@@ -11,6 +12,8 @@ from x402.types import (
     ListDiscoveryResourcesRequest,
     ListDiscoveryResourcesResponse,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class FacilitatorConfig(TypedDict, total=False):
@@ -50,6 +53,9 @@ class FacilitatorClient:
             headers.update(custom_headers.get("verify", {}))
 
         async with httpx.AsyncClient() as client:
+            logger.debug(f"Sending verify request to {self.config['url']}/verify")
+            logger.debug(f"Headers: {headers}")
+            
             response = await client.post(
                 f"{self.config['url']}/verify",
                 json={
@@ -62,6 +68,14 @@ class FacilitatorClient:
                 headers=headers,
                 follow_redirects=True,
             )
+
+            logger.debug(f"Verify response status: {response.status_code}")
+            logger.debug(f"Verify response headers: {response.headers}")
+            logger.debug(f"Verify response content: {response.text[:500]}")
+
+            if response.status_code != 200:
+                logger.error(f"Verify failed with status {response.status_code}: {response.text}")
+                raise Exception(f"Facilitator verify failed: {response.status_code} - {response.text}")
 
             data = response.json()
             return VerifyResponse(**data)
