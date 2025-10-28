@@ -21,6 +21,7 @@ load_dotenv()
 ADDRESS = os.getenv("ADDRESS")
 CDP_API_KEY_ID = os.getenv("CDP_API_KEY_ID")
 CDP_API_KEY_SECRET = os.getenv("CDP_API_KEY_SECRET")
+NETWORK = os.getenv("NETWORK")
 
 print(f"🔍 Loading environment variables:")
 print(f"   ADDRESS: {ADDRESS}")
@@ -29,6 +30,8 @@ print(f"   CDP_API_KEY_SECRET: {'SET' if CDP_API_KEY_SECRET else 'NOT SET'} ({le
 
 if not ADDRESS:
     raise ValueError("Missing required environment variable: ADDRESS")
+if not NETWORK or NETWORK not in ["base", "base-sepolia"]:
+    raise ValueError(f"Invalid network: {NETWORK}")
 
 app = FastAPI()
 
@@ -105,9 +108,9 @@ async def dynamic_price_middleware(request: Request, call_next):
     # Use the standard require_payment middleware with dynamic price
     payment_middleware = require_payment(
         path="/acp-budget",
-        price=budget,  # ⭐ 动态读取的 price
+        price=budget,  # ⭐ dynamic price
         pay_to_address=ADDRESS,
-        network="base",
+        network=NETWORK,
         facilitator_config=facilitator_config,
         description=f"$pong token access ({budget})",
         mime_type="application/json",
@@ -118,22 +121,22 @@ async def dynamic_price_middleware(request: Request, call_next):
 # Apply dynamic pricing middleware
 app.middleware("http")(dynamic_price_middleware)
 
-# Apply payment middleware to premium routes
-app.middleware("http")(
-    require_payment(
-        path="/premium/*",
-        price=TokenAmount(
-            amount="10000",
-            asset=TokenAsset(
-                address="0x036CbD53842c5426634e7929541eC2318f3dCF7e",
-                decimals=6,
-                eip712=EIP712Domain(name="USDC", version="2"),
-            ),
-        ),
-        pay_to_address=ADDRESS,
-        network="base-sepolia",
-    )
-)
+# # Apply payment middleware to premium routes
+# app.middleware("http")(
+#     require_payment(
+#         path="/premium/*",
+#         price=TokenAmount(
+#             amount="10000",
+#             asset=TokenAsset(
+#                 address="0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+#                 decimals=6,
+#                 eip712=EIP712Domain(name="USDC", version="2"),
+#             ),
+#         ),
+#         pay_to_address=ADDRESS,
+#         network=NETWORK,
+#     )
+# )
 
 
 @app.get("/")
@@ -144,20 +147,20 @@ async def health_check():
 @app.get("/acp-budget")
 async def acp_budget() -> Dict[str, Any]:
     return {
-        "message": "🏝️ $pong vibes unlocked! Welcome to the second coin on x402.",
-        "token": "pong",
+        "message": "pay acp job budget",
+        "token": "acp job payment token",
         "protocol": "x402",
         "utility": "none",
-        "vibes": "early adopter",
+        "vibes": "acp early adopter",
         "advice": "not financial advice"
     }
 
 
-@app.get("/premium/content")
-async def get_premium_content() -> Dict[str, Any]:
-    return {
-        "content": "This is premium content",
-    }
+# @app.get("/premium/content")
+# async def get_premium_content() -> Dict[str, Any]:
+#     return {
+#         "content": "This is premium content",
+#     }
 
 
 if __name__ == "__main__":
