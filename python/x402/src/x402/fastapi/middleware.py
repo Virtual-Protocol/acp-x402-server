@@ -146,7 +146,11 @@ def require_payment(
                     accepts=payment_requirements,
                     error=error,
                 ).model_dump(by_alias=True)
-                headers = {"Content-Type": "application/json"}
+                headers = {
+                    "Content-Type": "application/json",
+                    "Content-Encoding": "identity",  # Disable compression for x402scan
+                    "Cache-Control": "no-transform",  # Prevent any transformation
+                }
 
                 return JSONResponse(
                     content=response_data,
@@ -206,6 +210,9 @@ def require_payment(
                 response.headers["X-PAYMENT-RESPONSE"] = base64.b64encode(
                     settle_response.model_dump_json(by_alias=True).encode("utf-8")
                 ).decode("utf-8")
+                # Disable compression for x402scan compatibility
+                response.headers["Content-Encoding"] = "identity"
+                response.headers["Cache-Control"] = "no-transform"
             else:
                 return x402_response(
                     "Settle failed: "
