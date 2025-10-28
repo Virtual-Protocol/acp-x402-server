@@ -34,7 +34,7 @@ async def main():
             budget = "$0.01"  # ⭐ Your budget
             print(f"Making request to {endpoint_path} with budget: {budget}")
             
-            response = await client.get(
+            response = await client.post(
                 endpoint_path,
                 headers={"X-Budget": budget}  # ⭐ Dynamic pricing
             )

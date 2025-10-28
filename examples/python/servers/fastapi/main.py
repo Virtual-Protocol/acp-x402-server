@@ -4,7 +4,7 @@ from typing import Any, Dict
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from x402.fastapi.middleware import require_payment
-from x402.types import EIP712Domain, TokenAmount, TokenAsset
+from x402.types import EIP712Domain, TokenAmount, TokenAsset, HTTPInputSchema
 from cdp.auth import generate_jwt, JwtOptions
 
 # Configure logging
@@ -114,6 +114,17 @@ async def dynamic_price_middleware(request: Request, call_next):
         facilitator_config=facilitator_config,
         description=f"acp job budget ({budget})",
         mime_type="application/json",
+        # ⭐ Define input schema for x402scan registration
+        input_schema=HTTPInputSchema(
+            header_fields={
+                "X-Budget": {
+                    "type": "string",
+                    "required": False,
+                    "description": "Optional budget amount in USD (e.g., $0.01). If not provided, defaults to $0.001",
+                    "example": "$0.01"
+                }
+            }
+        ),
     )
     
     return await payment_middleware(request, call_next)
@@ -144,15 +155,20 @@ async def health_check():
     return {"status": "ok"}
 
 
-@app.get("/acp-budget")
-async def acp_budget() -> Dict[str, Any]:
+@app.api_route("/acp-budget", methods=["GET", "POST"])
+async def acp_budget(request: Request) -> Dict[str, Any]:
+    """
+    Handle both GET and POST requests for ACP budget payment.
+    x402scan may use either method depending on the request.
+    """
     return {
         "message": "pay acp job budget",
         "token": "acp job payment token",
         "protocol": "x402",
         "utility": "none",
         "vibes": "acp early adopter",
-        "advice": "not financial advice"
+        "advice": "not financial advice",
+        "method": request.method  # Show which method was used
     }
 
 
