@@ -112,7 +112,7 @@ async def dynamic_price_middleware(request: Request, call_next):
         pay_to_address=ADDRESS,
         network=NETWORK,
         facilitator_config=facilitator_config,
-        description=f"$pong token access ({budget})",
+        description=f"acp job budget ({budget})",
         mime_type="application/json",
     )
     
