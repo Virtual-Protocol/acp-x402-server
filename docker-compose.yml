@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  x402-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "4021:4021"
+    environment:
+      # Required: Set your Ethereum address
+      - ADDRESS=${ADDRESS}
+      # Optional: Coinbase CDP credentials
+      - CDP_API_KEY_ID=${CDP_API_KEY_ID:-}
+      - CDP_API_KEY_SECRET=${CDP_API_KEY_SECRET:-}
+      # Optional: Network
+      - NETWORK=${NETWORK:-base}
+    env_file:
+      - .env
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:4021/premium/content').read()",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

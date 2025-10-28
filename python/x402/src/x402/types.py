@@ -10,7 +10,7 @@ from typing_extensions import (
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic.alias_generators import to_camel
 
-from x402.networks import SupportedNetworks
+from x402.networks import SupportedNetworks, normalize_network
 
 
 # Add HTTP request structure types
@@ -111,6 +111,14 @@ class PaymentRequirements(BaseModel):
         populate_by_name=True,
         from_attributes=True,
     )
+
+    @field_validator("network", mode="before")
+    @classmethod
+    def validate_network(cls, v):
+        """Normalize network format (supports CAIP-2, chain ID, or standard format)"""
+        if isinstance(v, str):
+            return normalize_network(v)
+        return v
 
     @field_validator("max_amount_required")
     def validate_max_amount_required(cls, v):

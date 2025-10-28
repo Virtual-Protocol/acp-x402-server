@@ -7,7 +7,10 @@ dependencies = [
     "x402",
     "fastapi>=0.109.0",
     "uvicorn>=0.27.0",
-    "python-dotenv>=1.0.0"
+    "python-dotenv>=1.0.0",
+    "pyjwt>=2.8.0",
+    "cryptography>=41.0.0",
+    "cdp-sdk>=0.0.1"
 ]
 
 [build-system]

@@ -29,19 +29,24 @@ async def main():
         # Add payment hooks directly to client.event_hooks
         client.event_hooks = x402_payment_hooks(account)
 
-        # Make request
+        # Make request with X-Budget header
         try:
-            print(f"Making request to {endpoint_path}")
-            response = await client.get(endpoint_path)
+            budget = "$0.01"  # ⭐ Your budget
+            print(f"Making request to {endpoint_path} with budget: {budget}")
+            
+            response = await client.get(
+                endpoint_path,
+                headers={"X-Budget": budget}  # ⭐ Dynamic pricing
+            )
 
             # Read the response content
             content = await response.aread()
             print(f"Response: {content.decode()}")
 
             # Check for payment response header
-            if "X-Payment-Response" in response.headers:
+            if "X-PAYMENT-RESPONSE" in response.headers:
                 payment_response = decode_x_payment_response(
-                    response.headers["X-Payment-Response"]
+                    response.headers["X-PAYMENT-RESPONSE"]
                 )
                 print(
                     f"Payment response transaction hash: {payment_response['transaction']}"
