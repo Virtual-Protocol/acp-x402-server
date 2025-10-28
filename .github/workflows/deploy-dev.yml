@@ -39,4 +39,4 @@ jobs:
 
       - name: Force deployment (dev-acp-x402-server)
         run: |
-          aws ecs update-service --cluster dev-protocol-be --service dev-acp-x402-server --force-new-deployment
+          aws ecs update-service --cluster acp-be --service dev-acp-x402-server --force-new-deployment
