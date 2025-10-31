@@ -121,6 +121,8 @@ async def dynamic_price_middleware(request: Request, call_next):
         facilitator_config=facilitator_config,
         description=f"acp job budget ({budget})",
         mime_type="application/json",
+        max_deadline_seconds=300,  # ⭐ 5 minutes
+
         # ⭐ Define input schema for x402scan registration
         input_schema=HTTPInputSchema(
             header_fields={
