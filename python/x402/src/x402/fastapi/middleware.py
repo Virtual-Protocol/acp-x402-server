@@ -203,9 +203,13 @@ def require_payment(
 
         # Settle the payment
         try:
+            print('payment: ', json.dumps(payment));
+            print('selected_payment_requirements: ', json.dumps(selected_payment_requirements));
+
             settle_response = await facilitator.settle(
                 payment, selected_payment_requirements
             )
+
             if settle_response.success:
                 response.headers["X-PAYMENT-RESPONSE"] = base64.b64encode(
                     settle_response.model_dump_json(by_alias=True).encode("utf-8")
