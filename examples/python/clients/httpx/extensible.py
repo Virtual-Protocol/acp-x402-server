@@ -31,7 +31,7 @@ async def main():
 
         # Make request with X-Budget header
         try:
-            budget = "$0.01"  # ⭐ Your budget
+            budget = "$0.69"  # ⭐ Your budget
             print(f"Making request to {endpoint_path} with budget: {budget}")
             
             response = await client.post(

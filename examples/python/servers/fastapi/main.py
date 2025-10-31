@@ -159,7 +159,31 @@ app.middleware("http")(dynamic_price_middleware)
 
 @app.get("/")
 async def health_check():
-    return {"status": "ok"}
+    """Health check endpoint that also serves as site metadata"""
+    from fastapi.responses import HTMLResponse
+    
+    # Return HTML with meta tags for better x402scan integration
+    html_content = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Virtuals Protocol - ACP Job Payment</title>
+        <meta name="description" content="Virtuals Protocol ACP Job Budget Payment Service">
+        <meta property="og:title" content="Virtuals Protocol ACP">
+        <meta property="og:description" content="Pay for ACP jobs with x402 protocol">
+        <meta property="og:site_name" content="Virtuals Protocol">
+        <link rel="icon" href="/favicon.ico">
+    </head>
+    <body>
+        <h1>Virtuals Protocol - ACP Job Payment</h1>
+        <p>This is an x402 payment service for Virtuals Protocol ACP jobs.</p>
+        <p>Status: <span style="color: green;">✓ Operational</span></p>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
 
 
 @app.get("/favicon.ico")

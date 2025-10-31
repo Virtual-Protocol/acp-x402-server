@@ -201,11 +201,16 @@ def require_payment(
         if response.status_code < 200 or response.status_code >= 300:
             return response
 
+        logger.info('payment: %s', payment.model_dump_json(by_alias=True))
+        logger.info('selected_payment_requirements: %s', selected_payment_requirements.model_dump_json(by_alias=True, exclude_none=True))
+
         # Settle the payment
         try:
+
             settle_response = await facilitator.settle(
                 payment, selected_payment_requirements
             )
+
             if settle_response.success:
                 response.headers["X-PAYMENT-RESPONSE"] = base64.b64encode(
                     settle_response.model_dump_json(by_alias=True).encode("utf-8")
