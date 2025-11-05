@@ -183,6 +183,7 @@ async def health_check():
         <meta property="og:description" content="Pay for ACP jobs with x402 protocol on Virtuals Protocol">
         <meta property="og:site_name" content="Virtuals Protocol">
         <meta property="og:type" content="website">
+        <meta property="og:image" content="/static/logo.png">
         
         <!-- Favicon (x402scan displays this as the resource icon) -->
         <link rel="icon" type="image/x-icon" href="/favicon.ico">
@@ -250,6 +251,7 @@ async def acp_budget(request: Request) -> Dict[str, Any]:
 #         "content": "This is premium content",
 #     }
 
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 if __name__ == "__main__":
     import uvicorn
