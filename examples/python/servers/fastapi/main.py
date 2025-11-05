@@ -174,12 +174,12 @@ async def health_check():
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
         <!-- Primary metadata (highest priority for x402scan) -->
-        <title>ACP- Virtuals Protocol</title>
+        <title>ACP - Virtuals Protocol</title>
         <meta name="title" content="ACP - Virtuals Protocol">
         <meta name="description" content="Virtuals Protocol ACP Job Payment Service - Pay for ACP jobs using x402 protocol">
         
         <!-- Open Graph metadata (fallback for x402scan) -->
-        <meta property="og:title" content="Virtuals Protocol - ACP Job Payment">
+        <meta property="og:title" content="ACP - Virtuals Protocol">
         <meta property="og:description" content="Pay for ACP jobs with x402 protocol on Virtuals Protocol">
         <meta property="og:site_name" content="Virtuals Protocol">
         <meta property="og:type" content="website">
@@ -190,7 +190,7 @@ async def health_check():
         <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
     </head>
     <body>
-        <h1>🤖 Virtuals Protocol - ACP Job Payment</h1>
+        <h1>🤖 ACP - Virtuals Protocol</h1>
         <p>This is an x402 payment service for Virtuals Protocol ACP jobs.</p>
         <p>Status: <span style="color: green;">✓ Operational</span></p>
         <hr>
