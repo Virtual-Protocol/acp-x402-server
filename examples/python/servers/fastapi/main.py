@@ -161,27 +161,42 @@ app.middleware("http")(dynamic_price_middleware)
 
 @app.get("/")
 async def health_check():
-    """Health check endpoint that also serves as site metadata"""
+    """Health check endpoint that also serves as site metadata for x402scan"""
     from fastapi.responses import HTMLResponse
     
-    # Return HTML with meta tags for better x402scan integration
+    # Return HTML with meta tags for x402scan to scrape
+    # x402scan extracts: title, description, favicon, og:* tags
     html_content = """
     <!DOCTYPE html>
     <html>
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <!-- Primary metadata (highest priority for x402scan) -->
         <title>Virtuals Protocol - ACP Job Payment</title>
-        <meta name="description" content="Virtuals Protocol ACP Job Budget Payment Service">
-        <meta property="og:title" content="Virtuals Protocol ACP">
-        <meta property="og:description" content="Pay for ACP jobs with x402 protocol">
+        <meta name="title" content="Virtuals Protocol - ACP Job Payment">
+        <meta name="description" content="Virtuals Protocol ACP Job Payment Service - Pay for ACP jobs using x402 protocol">
+        
+        <!-- Open Graph metadata (fallback for x402scan) -->
+        <meta property="og:title" content="Virtuals Protocol - ACP Job Payment">
+        <meta property="og:description" content="Pay for ACP jobs with x402 protocol on Virtuals Protocol">
         <meta property="og:site_name" content="Virtuals Protocol">
-        <link rel="icon" href="/favicon.ico">
+        <meta property="og:type" content="website">
+        
+        <!-- Favicon (x402scan displays this as the resource icon) -->
+        <link rel="icon" type="image/x-icon" href="/favicon.ico">
+        <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
     </head>
     <body>
-        <h1>Virtuals Protocol - ACP Job Payment</h1>
+        <h1>🤖 Virtuals Protocol - ACP Job Payment</h1>
         <p>This is an x402 payment service for Virtuals Protocol ACP jobs.</p>
         <p>Status: <span style="color: green;">✓ Operational</span></p>
+        <hr>
+        <h2>Available Endpoints:</h2>
+        <ul>
+            <li><code>/acp-budget</code> - Pay for ACP job budget (supports dynamic pricing via X-Budget header)</li>
+        </ul>
     </body>
     </html>
     """
@@ -191,11 +206,14 @@ async def health_check():
 @app.get("/favicon.ico")
 async def favicon():
     """Serve favicon for x402scan to display as resource icon"""
+    from fastapi.responses import Response
+    
     favicon_path = os.path.join(os.path.dirname(__file__), "static", "favicon.ico")
     if os.path.exists(favicon_path):
         return FileResponse(favicon_path, media_type="image/x-icon")
-    # Return a default response if favicon doesn't exist
-    return FileResponse(favicon_path, media_type="image/x-icon", status_code=404)
+    
+    # Return 404 if favicon doesn't exist
+    return Response(status_code=404, content="Favicon not found")
 
 
 @app.api_route("/acp-budget", methods=["GET", "POST"])
