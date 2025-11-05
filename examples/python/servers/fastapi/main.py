@@ -174,8 +174,8 @@ async def health_check():
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
         <!-- Primary metadata (highest priority for x402scan) -->
-        <title>Virtuals Protocol - ACP Job Payment</title>
-        <meta name="title" content="Virtuals Protocol - ACP Job Payment">
+        <title>ACP- Virtuals Protocol</title>
+        <meta name="title" content="ACP - Virtuals Protocol">
         <meta name="description" content="Virtuals Protocol ACP Job Payment Service - Pay for ACP jobs using x402 protocol">
         
         <!-- Open Graph metadata (fallback for x402scan) -->
