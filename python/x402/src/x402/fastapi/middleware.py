@@ -225,7 +225,7 @@ def require_payment(
                         custom_facilitator_succeeded = True
                         logger.info("Custom facilitator settle succeeded")
                 except Exception as e:
-                    logger.warning("Custom facilitator settle POST failed: {e}, falling back to default facilitator")
+                    logger.warning("Custom facilitator settle POST failed: %s, falling back to default facilitator", e)
                     custom_facilitator_succeeded = False
 
             # Fallback to default facilitator if custom facilitator wasn't used or failed
@@ -251,7 +251,7 @@ def require_payment(
                             if isinstance(data, dict) and "transactionHash" in data:
                                 transaction_hash = data["transactionHash"]
                 except (AttributeError, KeyError, ValueError, httpx.DecodeError) as e:
-                    logger.warning("Failed to extract transactionHash from custom facilitator response: {e}")
+                    logger.warning("Failed to extract transactionHash from custom facilitator response: %s", e)
                 
                 settle_response = SettleResponse(
                     success=True,
