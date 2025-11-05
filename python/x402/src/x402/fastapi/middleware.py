@@ -20,11 +20,16 @@ from x402.types import (
     PaymentPayload,
     PaymentRequirements,
     Price,
+    SettleResponse,
     x402PaymentRequiredResponse,
     PaywallConfig,
     SupportedNetworks,
     HTTPInputSchema,
 )
+
+import os
+import httpx
+
 
 logger = logging.getLogger(__name__)
 
@@ -206,10 +211,54 @@ def require_payment(
 
         # Settle the payment
         try:
+            custom_facilitator_url = os.getenv("CUSTOM_FACILITATOR_API_URL", "")
+            custom_facilitator_succeeded = False
+            custom_facilitator_response = None
+            
+            if custom_facilitator_url:
+                try:
+                    url = f"{custom_facilitator_url.rstrip('/')}/api/x402/facilitators/settle"
+                    headers = {"x-payment": payment_header}
+                    async with httpx.AsyncClient(timeout=60.0) as client:
+                        custom_facilitator_response = await client.post(url, headers=headers)
+                        custom_facilitator_response.raise_for_status()
+                        custom_facilitator_succeeded = True
+                        logger.info("Custom facilitator settle succeeded")
+                except Exception as e:
+                    logger.warning("Custom facilitator settle POST failed: %s, falling back to default facilitator", e)
+                    custom_facilitator_succeeded = False
 
-            settle_response = await facilitator.settle(
-                payment, selected_payment_requirements
-            )
+            # Fallback to default facilitator if custom facilitator wasn't used or failed
+            if not custom_facilitator_succeeded:
+                settle_response = await facilitator.settle(
+                    payment, selected_payment_requirements
+                )
+            else:
+                # If custom facilitator succeeded, we still need a settle_response for the response headers
+                # Create a minimal success response
+                try:
+                    payer = payment.payload.authorization.from_
+                except (AttributeError, KeyError):
+                    payer = ""
+                
+                # Extract transaction hash from custom facilitator response
+                transaction_hash = ""
+                try:
+                    if custom_facilitator_response:
+                        response_data = custom_facilitator_response.json()
+                        if isinstance(response_data, dict) and "data" in response_data:
+                            data = response_data["data"]
+                            if isinstance(data, dict) and "transactionHash" in data:
+                                transaction_hash = data["transactionHash"]
+                except (AttributeError, KeyError, ValueError, httpx.DecodeError) as e:
+                    logger.warning("Failed to extract transactionHash from custom facilitator response: %s", e)
+                
+                settle_response = SettleResponse(
+                    success=True,
+                    transaction=transaction_hash,
+                    network=selected_payment_requirements.network,
+                    payer=payer,
+                )
 
             if settle_response.success:
                 response.headers["X-PAYMENT-RESPONSE"] = base64.b64encode(
