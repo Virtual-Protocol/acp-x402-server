@@ -20,19 +20,19 @@ logging.basicConfig(
 load_dotenv()
 
 # Get configuration from environment
-ADDRESS = os.getenv("ADDRESS")
-PAYMENT_MANAGER_ADDRESS = os.getenv("PAYMENT_MANAGER_ADDRESS")
+ACP_V1_RECEIVER_ADDRESS = os.getenv("ACP_V1_RECEIVER_ADDRESS")
+ACP_V2_RECEIVER_ADDRESS = os.getenv("ACP_V2_RECEIVER_ADDRESS")
 CDP_API_KEY_ID = os.getenv("CDP_API_KEY_ID")
 CDP_API_KEY_SECRET = os.getenv("CDP_API_KEY_SECRET")
 NETWORK = os.getenv("NETWORK")
 
 print(f"🔍 Loading environment variables:")
-print(f"   ADDRESS: {ADDRESS}")
+print(f"   ADDRESS: {ACP_V1_RECEIVER_ADDRESS}" + f" {ACP_V2_RECEIVER_ADDRESS}")
 print(f"   CDP_API_KEY_ID: {CDP_API_KEY_ID[:20] if CDP_API_KEY_ID else 'NOT SET'}...")
 print(f"   CDP_API_KEY_SECRET: {'SET' if CDP_API_KEY_SECRET else 'NOT SET'} ({len(CDP_API_KEY_SECRET) if CDP_API_KEY_SECRET else 0} chars)")
 
-if not ADDRESS:
-    raise ValueError("Missing required environment variable: ADDRESS")
+if not ACP_V1_RECEIVER_ADDRESS or not ACP_V2_RECEIVER_ADDRESS:
+    raise ValueError("Missing required environment variable: ACP_V1_RECEIVER_ADDRESS or ACP_V2_RECEIVER_ADDRESS")
 if not NETWORK or NETWORK not in ["base", "base-sepolia"]:
     raise ValueError(f"Invalid network: {NETWORK}")
 
@@ -121,9 +121,9 @@ async def dynamic_price_middleware(request: Request, call_next):
         acp_version = 1
 
     if acp_version == 2:
-        pay_to_address = PAYMENT_MANAGER_ADDRESS
+        pay_to_address = ACP_V2_RECEIVER_ADDRESS
     else:
-        pay_to_address = ADDRESS
+        pay_to_address = ACP_V1_RECEIVER_ADDRESS
     
     # Use the standard require_payment middleware with dynamic price
     payment_middleware = require_payment(
