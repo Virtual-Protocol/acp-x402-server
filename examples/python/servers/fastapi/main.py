@@ -21,6 +21,7 @@ load_dotenv()
 
 # Get configuration from environment
 ADDRESS = os.getenv("ADDRESS")
+PAYMENT_MANAGER_ADDRESS = os.getenv("PAYMENT_MANAGER_ADDRESS")
 CDP_API_KEY_ID = os.getenv("CDP_API_KEY_ID")
 CDP_API_KEY_SECRET = os.getenv("CDP_API_KEY_SECRET")
 NETWORK = os.getenv("NETWORK")
@@ -111,12 +112,24 @@ async def dynamic_price_middleware(request: Request, call_next):
     # Read dynamic price from X-Budget header
     budget = request.headers.get("X-Budget", "$0.001")
     print(f"📋 Dynamic budget from header: {budget}")
+
+    # Receiver depends on ACP version
+    acp_version_str = request.headers.get("X-ACP-VERSION", "1")
+    try:
+        acp_version = int(acp_version_str)
+    except ValueError:
+        acp_version = 1
+
+    if acp_version == 2:
+        pay_to_address = PAYMENT_MANAGER_ADDRESS
+    else:
+        pay_to_address = ADDRESS
     
     # Use the standard require_payment middleware with dynamic price
     payment_middleware = require_payment(
         path="/acp-budget",
         price=budget,  # ⭐ dynamic price
-        pay_to_address=ADDRESS,
+        pay_to_address=pay_to_address,
         network=NETWORK,
         facilitator_config=facilitator_config,
         description=f"acp job budget ({budget})",
