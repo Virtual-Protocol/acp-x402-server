@@ -106,7 +106,7 @@ else:
 # Custom dynamic pricing middleware for /acp-budget
 async def dynamic_price_middleware(request: Request, call_next):
     """Middleware that reads price from X-Budget header"""
-    if not request.url.path.startswith("/acp-budget"):
+    if not request.url.path.startswith("/acp-budget") and not request.url.path.startswith("/acp-budget/v2"):
         return await call_next(request)
     
     # Read dynamic price from X-Budget header
@@ -124,10 +124,13 @@ async def dynamic_price_middleware(request: Request, call_next):
         pay_to_address = ACP_V2_RECEIVER_ADDRESS
     else:
         pay_to_address = ACP_V1_RECEIVER_ADDRESS
+
+    if request.url.path.startswith("/acp-budget/v2"):
+        pay_to_address = ACP_V2_RECEIVER_ADDRESS
     
     # Use the standard require_payment middleware with dynamic price
     payment_middleware = require_payment(
-        path="/acp-budget",
+        path=["/acp-budget", "/acp-budget/v2"],
         price=budget,  # ⭐ dynamic price
         pay_to_address=pay_to_address,
         network=NETWORK,
@@ -257,6 +260,32 @@ async def acp_budget(request: Request) -> Dict[str, Any]:
         }
     )
 
+@app.api_route("/acp-budget/v2", methods=["GET", "POST"])
+async def acp_budget(request: Request) -> Dict[str, Any]:
+    """
+    Handle both GET and POST requests for ACP budget payment.
+    x402scan may use either method depending on the request.
+    """
+    from fastapi.responses import JSONResponse
+    
+    response_data = {
+        "message": "pay acp job budget",
+        "token": "acp job payment token",
+        "protocol": "x402",
+        "utility": "none",
+        "vibes": "acp early adopter",
+        "advice": "not financial advice",
+        "method": request.method  # Show which method was used
+    }
+    
+    # Explicitly disable compression for x402scan compatibility
+    return JSONResponse(
+        content=response_data,
+        headers={
+            "Content-Encoding": "identity",  # Tell CloudFlare: no compression
+            "Cache-Control": "no-transform",  # Prevent any transformation
+        }
+    )
 
 # @app.get("/premium/content")
 # async def get_premium_content() -> Dict[str, Any]:
